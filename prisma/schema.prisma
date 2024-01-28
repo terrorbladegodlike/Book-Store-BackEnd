@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Author {
+  id    Int @unique @default(autoincrement())
+  firstName  String
+  lastName   String
+  yearsActive   Int
+  books BookAuthors[]
+}
+
+model Book {
+  id          Int @unique @default(autoincrement())
+  name        String?
+  language    String?
+  price       Int?
+  currencyId  Int
+  currency    Currency @relation(fields: [currencyId], references: [id])
+  author      BookAuthors[]
+  categories  BookCategories[]
+  rating Rating[]
+  users UserBooks[]
+}
+
+model BookAuthors {
+  book      Book    @relation(fields: [bookId], references: [id])
+  bookId    Int
+  author    Author  @relation(fields: [authorId], references: [id])
+  authorId  Int
+
+  @@id([bookId])
+}
+
+model BookCategories {
+  id    Int @unique @default(autoincrement())
+  book Book @relation(fields: [bookId], references: [id])
+  bookId  Int
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([bookId, categoryId])
+}
+
+model Category {
+  id Int @unique @default(autoincrement())
+  createdAt DateTime @db.Timestamptz() @default(now())
+  name String @db.VarChar(255)
+  categories BookCategories[]
+}
+
+model Currency {
+  id      Int @id @default(autoincrement())
+  name    String?
+  acronym String?
+  Book    Book[]
+}
+
+model Rating {
+  id Int @unique @default(autoincrement())
+  value Int
+  comment String
+  bookId Int
+  book Book @relation(fields: [bookId], references: [id])
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([bookId, userId])
+}
+
+model User {
+  id        Int @unique @default(autoincrement())
+  name      String @db.VarChar(255)
+  email     String
+  password  String
+  dob       String
+  rating Rating[]
+  books UserBooks[]
+}
+
+model UserBooks {
+  id Int @unique @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  bookId Int
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@id([bookId, userId])
+}
+
+
+
+
+
+
